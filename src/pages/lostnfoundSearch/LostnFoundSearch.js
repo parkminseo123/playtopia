@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import BasicButton from '../../components/button/BasicButton.jsx';
 import { Link, useParams } from 'react-router-dom';
 import S from './style.js';
@@ -8,28 +8,68 @@ const LostnFoundSearch = () => {
   const [lostnfoundlist, setLostList] = useState([]);
   const [isChecked, setIsChecked] = useState(false);
   
+  useEffect(() => {
+    fetch('http://localhost:8010/lostnfoundlist/list/all/')
+      .then((res) => res.json())
+      .then((data) => {
+        const filteredList = data.lostnfoundlist.filter(item => {
+          return parseInt(item.no) === parseInt(id) && item.company.trim() === company.trim();
+        });
+        
+
+        setLostList(filteredList);
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+  }, [id, company]); 
+
   const handleCheckboxChange = () => {
     setIsChecked(!isChecked);
   };
 
-  useEffect(() => {
-    fetch('http://localhost:8014/lostnfoundsearch')
-      .then(response => response.json())
-      .then(data => {
-        if (data && data.LostnFoundSearch) {
-          setLostList(data.LostnFoundSearch);
-        }
-      });
-  }, []); 
-
-  
-  const filteredItems = useMemo(() => {
-    return lostnfoundlist.filter(item => parseInt(item.no) === parseInt(id) && item.company === company);
-  }, [lostnfoundlist, id, company]);
-
   const handleRegisterClick = () => {
+    const updatedList = lostnfoundlist.map(item => {
+      if (parseInt(item.no) === parseInt(id) && item.company.trim() === company.trim()) {
+        return {
+          ...item,
+          result: "처리중"
+        };
+      } else {
+        return item;
+      }
+    });
+    setLostList(updatedList);
+
+
+    fetch(`http://localhost:8010/lostnfoundlist/post`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        result: '처리중'
+      })
+    })
+    .then(response => response.json())
     alert("분실물 찾기 신청이 완료되었습니다.");
   };
+
+  function addSevenDays(dateString) {
+
+    const originalDate = new Date(dateString);
+    
+
+    const newDate = new Date(originalDate);
+    newDate.setDate(newDate.getDate() + 7);
+
+    const year = newDate.getFullYear();
+    const month = ("0" + (newDate.getMonth() + 1)).slice(-2);
+    const day = ("0" + newDate.getDate()).slice(-2);
+
+    return year + "-" + month + "-" + day;
+  }
+
 
   return (
     <>
@@ -44,24 +84,20 @@ const LostnFoundSearch = () => {
             <p>이름 :<S.StyledInput style={{marginLeft:"30px",width:"400px", height:"40px"}}type='text' /></p>
             <p>연락처 : <S.StyledInput style={{marginRight:"15px",marginLeft:"30px",width:"110px", height:"40px"}} type='text' />
             - <S.StyledInput style={{marginLeft:"15px",marginRight:"15px",width:"110px", height:"40px"}} type='text' /> - 
-            <S.StyledInput style={{marginLeft:"15px",width:"110px", height:"40px"}} type='text' /></p> 
+              <S.StyledInput style={{marginLeft:"15px",width:"110px", height:"40px"}} type='text' /></p> 
 
-            {filteredItems.map(item => {
-              if (parseInt(item.no) === parseInt(id) && item.company === company) {
-                const originalDate = new Date(item.date);
-                const newDate = new Date(originalDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+              {lostnfoundlist.map(item => {
+              const startDate = item.date;
+              const endDate = addSevenDays(startDate);
+              
                 return (
                   <div key={item._id}>
-                    <p style={{marginBottom:"30px"}}>찾는 물건 : {item.item}</p>
-                    <p>
-                      수령 가능 기간 : {item.date} - {newDate.toLocaleDateString()}
-                    </p>
+                    <p>찾는 물건 : {item.item}</p>
+                    <p>수령 가능 기간 : {startDate} ~ {endDate}</p>
                   </div>
-                );
-              }
-              return null; 
-            })}
-          </div>
+                        );
+                      })}
+            </div>
         </S.titlebox>
         
         <S.contentbox>
@@ -96,4 +132,4 @@ const LostnFoundSearch = () => {
   );
 };
 
-export default React.memo(LostnFoundSearch);
+export default LostnFoundSearch;

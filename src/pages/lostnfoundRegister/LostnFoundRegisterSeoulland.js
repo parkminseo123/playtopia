@@ -14,46 +14,81 @@ const LostnFoundRegisterSeoulland = () => {
     company: "seoulland"
   });
 
-  useEffect(() => {
-    fetch('http://localhost:8010/lostnfoundlist/latest')
-      .then((res) => res.json())
-      .then((data) => {
-        setLostnSeoulland((prev) => ({
-          ...prev,
-          no: data.no + 1, 
-          date: data, 
-        }));
-      })
-  }, []);
-  
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setLostnSeoulland({ ...lostnseouland, [name]: value });
   };
 
-  const handleSubmit = (e) => {
-  e.preventDefault();
+  
 
-  fetch('http://localhost:8010/lostnfoundlist', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      ...lostnseouland,
-      date: new Date(), 
-    }),
-  })
-  .then((res) => res.json())
-  .then((data) => {
-    setLostnSeoulland((prevState) => ({
-      ...prevState,
-      no: prevState.no + 1,
-    }));
-    alert('글 등록이 완료되었습니다.');
-  })
-};
+  useEffect(() => {
+    fetch('http://localhost:8010/lostnfoundlist/list/')
+      .then((res) => res.json())
+      .then((data) => {
+        setLostnSeoulland((prev) => ({
+          ...prev,
+          no: data.no + 1, 
+          date: data.date, 
+        }));
+      })
+  }, []);
+
+  useEffect(() => {
+    fetch('http://localhost:8010/lostnfoundexplain/list/')
+      .then((res) => res.json())
+      .then((data) => {
+        setLostnSeoulland((prev) => ({
+          ...prev,
+          no: data.no + 1, 
+          date: data.date, 
+        }));
+      })
+  }, []);
+
+ 
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    fetch('http://localhost:8010/lostnfoundexplain/post/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        ...lostnseouland,
+        date: new Date().toISOString(), 
+      }),
+    })
+    .then((res) => {
+      return res.json();
+    })
+
+    fetch('http://localhost:8010/lostnfoundlist/post/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        ...lostnseouland,
+        date: new Date().toISOString(), 
+      }),
+    })
+    .then((res) => {
+      return res.json();
+    })
+    .then((data) => {
+      setLostnSeoulland((prevState) => ({
+        ...prevState,
+        no: prevState.no + 1,
+      }));
+      alert('글 등록이 완료되었습니다.');
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+      alert('글 등록 중 오류');
+    });
+  };
 
   return (
     <>
@@ -70,8 +105,7 @@ const LostnFoundRegisterSeoulland = () => {
       </S.head>
 
       <S.header>
-      <h1 style={{marginRight:"600px", marginBottom:"60px"}}>분실물 등록</h1>
-      
+        <h1 style={{marginRight:"600px", marginBottom:"60px"}}>분실물 등록</h1>
       </S.header>
 
       <div>
@@ -81,7 +115,7 @@ const LostnFoundRegisterSeoulland = () => {
         </S.subtitle>
 
         <S.inputbox>
-          <S.StyledInput type='text' name='item'placeholder="종류"  value={lostnseouland.item} onChange={handleChange} />
+          <S.StyledInput type='text' name='item' placeholder="종류" value={lostnseouland.item} onChange={handleChange} />
           <S.StyledInput style={{ marginLeft: '250px' }} type='text' name='found' placeholder="장소" value={lostnseouland.found} onChange={handleChange} />
         </S.inputbox>
       </div>
@@ -97,16 +131,15 @@ const LostnFoundRegisterSeoulland = () => {
       </div>
 
       <S.buttonbox>
-          <BasicButton style={{ backgroundColor: "white", color: "#1FB1D9", border: "1px solid #1FB1D9" }}
-            size={"small"} shape={"default"} color={"white"} variant={"main"}>
-              <Link style={{ color:"#1FB1D9"}} to={`/lostnfound/list/seoulland`}>뒤로가기</Link></BasicButton>
+        <BasicButton style={{ backgroundColor: "white", color: "#1FB1D9", border: "1px solid #1FB1D9" }} size={"small"} shape={"default"} color={"white"} variant={"main"}>
+          <Link style={{ color:"#1FB1D9"}} to={`/lostnfound/list/seoulland`}>뒤로가기</Link>
+        </BasicButton>
 
         <BasicButton style={{ marginLeft: '250px' }} size={"small"} shape={"default"} color={"white"} variant={"main"} onClick={handleSubmit}>
           <Link style={{ color:"#fff"}}to={`/lostnfound/list/seoulland`}>
-          등록하기
+            등록하기
           </Link>
         </BasicButton>
-
       </S.buttonbox>
     </>
   );

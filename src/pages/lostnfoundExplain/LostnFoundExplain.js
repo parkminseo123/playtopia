@@ -10,7 +10,7 @@ const LostnFoundExplain = () => {
   const [lostnfoundexplain, setLostnFoundExplain] = useState([]);
 
   useEffect(() => {
-    fetch(`http://localhost:8011/lostnfoundexplain`)
+    fetch(`http://localhost:8010/lostnfoundexplain/list`)
       .then((res) => res.json())
       .then((data) => setLostnFoundExplain(data.LostnFoundExplain));
   }, []);

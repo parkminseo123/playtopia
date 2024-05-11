@@ -1,9 +1,8 @@
-import express from 'express';
-import FaqExplainSchema from './FaqExplainSchema.js';
+import FaqExplainSchema from "./FaqExplainSchema.js";
 
-const router = express.Router();
 
-router.get('/', async (req, res) => {
+
+const list =  async (req, res) => {
     try {
         const faqexplain = await FaqExplainSchema.find({}, 'no title content');
 
@@ -14,9 +13,6 @@ router.get('/', async (req, res) => {
         console.error('router get', error);
         res.status(404).json({ error: 'router get' });
     }
-});
+};
 
-
-
-
-export default router;
+export {list}

@@ -6,7 +6,9 @@ const QnaExplainShema = new Schema({
     no: Number,
     title: String,
     content: String,
-    name : String
+    name : String,
+    explianontent : String,
+    date : String
 });
 
 

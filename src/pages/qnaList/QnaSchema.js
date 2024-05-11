@@ -5,7 +5,7 @@ import { Schema, model } from "mongoose";
 const QnaSchema = new Schema({
     no: Number,
     title: String,
-    content: String,
+    category: String,
     date: String
 });
 

@@ -1,11 +1,8 @@
-import express from 'express';
-import LostnFoundSchema from './LostnFoundSchema.js';
-
-const router = express.Router();
+import LostnFoundSchema from "./LostnFoundSchema.js";
 
 let currentNo = 22; 
 
-router.get('/', async (req, res) => {
+const list =  async (req, res) => {
 
     const page = req.query.page || 1;
     const limit = 5; 
@@ -23,15 +20,27 @@ router.get('/', async (req, res) => {
         const totalPages = Math.ceil(totalLostFoundCount / limit);
 
         const lostnfoundlist = await LostnFoundSchema.find(query, 'no item found date result company').skip(skip).limit(limit);
-
+        const searchlostn = await LostnFoundSchema.find({}, 'no item found date result company');
+        
         res.json({
             lostnfoundlist: lostnfoundlist,
-            totalPages: totalPages
+            totalPages: totalPages,
+            searchlostn : searchlostn
         });
 
-});
+};
 
-router.post('/', async (req, res) => {
+const listAll = async (req, res) => {
+    try {
+        const lostnfoundlist = await LostnFoundSchema.find({}, 'no item found date result company');
+        res.json({ lostnfoundlist });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+
+const post =  async (req, res) => {
     const { no, item, found, result, company } = req.body;
     const date = new Date().toISOString().split('T')[0]; 
         const newLostFound = new LostnFoundSchema({ no: currentNo++, item, found, date, result, company });
@@ -40,7 +49,6 @@ router.post('/', async (req, res) => {
             ...newLostFound.toObject(), 
             date: date 
         });
-});
+};
 
-
-export default router;
+export {list, post, listAll}

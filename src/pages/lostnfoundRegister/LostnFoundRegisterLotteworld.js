@@ -16,17 +16,28 @@ const LostnFoundRegisterLotteworld = () => {
   });
 
   useEffect(() => {
-    fetch('http://localhost:8010/lostnfoundlist/latest')
+    fetch('http://localhost:8010/lostnfoundlist/list/')
       .then((res) => res.json())
       .then((data) => {
         setLostnLotteworld((prev) => ({
           ...prev,
           no: data.no + 1, 
-          date: data, 
+          date: data.date, 
         }));
       })
   }, []);
-  
+
+  useEffect(() => {
+    fetch('http://localhost:8010/lostnfoundexplain/list/')
+      .then((res) => res.json())
+      .then((data) => {
+        setLostnLotteworld((prev) => ({
+          ...prev,
+          no: data.no + 1, 
+          date: data.date, 
+        }));
+      })
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -34,27 +45,48 @@ const LostnFoundRegisterLotteworld = () => {
   };
 
   const handleSubmit = (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  fetch('http://localhost:8010/lostnfoundlist', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      ...lostnlotteworld,
-      date: new Date(), 
-    }),
-  })
-  .then((res) => res.json())
-  .then((data) => {
-    setLostnLotteworld((prevState) => ({
-      ...prevState,
-      no: prevState.no + 1,
-    }));
-    alert('글 등록이 완료되었습니다.');
-  })
-};
+    fetch('http://localhost:8010/lostnfoundexplain/post/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        ...lostnlotteworld,
+        date: new Date().toISOString(), 
+      }),
+    })
+    .then((res) => {
+      return res.json();
+    })
+
+    fetch('http://localhost:8010/lostnfoundlist/post/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        ...lostnlotteworld,
+        date: new Date().toISOString(), 
+      }),
+    })
+    .then((res) => {
+      return res.json();
+    })
+    .then((data) => {
+      setLostnLotteworld((prevState) => ({
+        ...prevState,
+        no: prevState.no + 1,
+      }));
+      alert('글 등록이 완료되었습니다.');
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+      alert('글 등록 중 오류');
+    });
+  };
+
   return (
     <>
       <S.margin></S.margin>
@@ -93,7 +125,7 @@ const LostnFoundRegisterLotteworld = () => {
         </S.subtitle>
 
         <S.inputbox>
-          <S.StyledInput style={{ width: '850px', height: '300px' }} type="text" name="content" placeholder="내용을 입력해주세요." value={lostnlotteworld.content} onChange={handleChange} />
+          <S.StyledInput style={{ width: '850px', height: '300px' }} type="text" name="content" placeholder="내용을 입력해주세요" value={lostnlotteworld.content} onChange={handleChange} />
         </S.inputbox>
       </div>
 

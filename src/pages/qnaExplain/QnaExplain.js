@@ -2,12 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import S from './style.js';
 
+let currentNo = 22; 
 const QnaExplain = () => {
   const { id } = useParams();
    const [qnaexplain , setQnaExplain] = useState([])
 
    useEffect(() => {
-    fetch(`http://localhost:8003/qnaexplain`)
+    fetch(`http://localhost:8004/qnaexplain/list`)
     .then((res) => {
       if(!res.ok){
         throw new Error(`HTTP error ${res.status}`);

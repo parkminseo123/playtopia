@@ -10,13 +10,15 @@ import BasicButton from '../../components/button/BasicButton.jsx';
 const LostnFoundListLotteworld = () => {
   const [lostlist, setLostList] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);  
+  const [totalPages, setTotalPages] = useState(1);
+  const [searchInput, setSearchInput] = useState("");  
 
   useEffect(() => {
-    fetch(`http://localhost:8010/lostnfoundlist/?page=${currentPage}&company=lotteworld`)
+    fetch(`http://localhost:8010/lostnfoundlist/list/?page=${currentPage}&company=lotteworld`)
       .then((res) => res.json())
       .then(({ lostnfoundlist, totalPages }) => {
         if (Array.isArray(lostnfoundlist)) {
+          lostlist.sort((a, b) => a.no - b.no);
           setLostList(lostnfoundlist);
           setTotalPages(totalPages); 
         }
@@ -26,6 +28,14 @@ const LostnFoundListLotteworld = () => {
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
+
+  const handleSearchChange = (e) => {
+    setSearchInput(e.target.value);
+  };
+
+  const searchlotteworld  = lostlist.filter((lotteworld) => {
+    return lotteworld.item.toLowerCase().includes(searchInput.toLowerCase());
+  });
 
   return (
     <>
@@ -42,7 +52,7 @@ const LostnFoundListLotteworld = () => {
           <Link to={"/lostnfound/list/seoulland"}><S.seoulland>서울랜드</S.seoulland></Link>
         </S.title>
         <S.basicbox>
-        <BasicSearch size={"default"} shape={"default"} classname="serach"/>
+        <BasicSearch size={"default"} shape={"default"} classname="serach" placeholder="검색어를 입력하세요." onChange={handleSearchChange}/>
         
         <BasicButton size={"small"} shape={"default"} variant={"main"} color={"white"}>
         <Link to={`/lostnfound/register/lotteworld`}>글쓰기</Link></BasicButton>
@@ -51,7 +61,9 @@ const LostnFoundListLotteworld = () => {
       </S.head>
 
       <LostnFoundTable headersName={['No', '습득물', '습득장소', '습득날짜', '처리결과']} >
-        {lostlist.map((item, i) => (
+      {searchlotteworld
+          .filter(item => item.company === "lotteworld")
+          .map((item, i) => (
           <LostnFoundTableRow key={i} className="tablerow" >
             <LostnFoundTableColumn>{item.no}</LostnFoundTableColumn>
             <LostnFoundTableColumn>
@@ -71,8 +83,10 @@ const LostnFoundListLotteworld = () => {
       <S.pagebutton>
         {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNumber) => (
           <BasicButton
-            color={"white"}
-            variant={"main"}
+            color={pageNumber === currentPage ? "#FE78C0" : "black"} 
+            style={{background:"#fff",borderBottom: pageNumber === currentPage ? "2px solid #FE78C0" : "none"
+            , color: pageNumber === currentPage ? "#FE78C0" : "black" 
+            }}
             className="pagebutton"
             key={pageNumber}
             onClick={() => handlePageChange(pageNumber)}
