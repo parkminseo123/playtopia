@@ -6,20 +6,31 @@ import S from './style.js';
 const QnaRegister = () => {
   const [qnaregister, setQnaRegister] = useState({
     category: '',
-    division: '',
     title: '',
     content: '',
     no: null, 
   });
 
   useEffect(() => {
-    fetch('http://localhost:8004/qnalist/latest')
+    fetch('http://localhost:8004/qnalist/list/')
       .then((res) => res.json())
       .then((data) => {
         setQnaRegister((prev) => ({
           ...prev,
           no: data.no + 1, 
-          date: data, 
+          date: data.date, 
+        }));
+      })
+  }, []);
+
+  useEffect(() => {
+    fetch('http://localhost:8004/qnaexplain/list/')
+      .then((res) => res.json())
+      .then((data) => {
+        setQnaRegister((prev) => ({
+          ...prev,
+          no: data.no + 1, 
+          date: data.date, 
         }));
       })
   }, []);
@@ -32,24 +43,44 @@ const QnaRegister = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    fetch('http://localhost:8004/qnalist', {
+    fetch('http://localhost:8004/qnaexplain/post/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         ...qnaregister,
-        date: Date(), 
+        date: new Date().toISOString(), 
       }),
-    }).then((res) => {
-        return res.json();
-      }).then((data) => {
-        setQnaRegister((prevState) => ({
-          ...prevState,
-          no: prevState.no + 1,
-        }));
-        alert('글 등록이 완료되었습니다.');
-      })
+    })
+    .then((res) => {
+      return res.json();
+    })
+
+    fetch('http://localhost:8004/qnalist/post/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        ...qnaregister,
+        date: new Date().toISOString(), 
+      }),
+    })
+    .then((res) => {
+      return res.json();
+    })
+    .then((data) => {
+      setQnaRegister((prevState) => ({
+        ...prevState,
+        no: prevState.no + 1,
+      }));
+      alert('글 등록이 완료되었습니다.');
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+      alert('글 등록 중 오류');
+    });
   };
 
 
@@ -71,7 +102,7 @@ const QnaRegister = () => {
         </S.subtitle>
 
         <S.inputbox>
-        <S.category name="title"  value={qnaregister.title} onChange={handleChange}>
+        <S.category name="category"  value={qnaregister.category} onChange={handleChange}>
           <option value="">카테고리를 선택하세요</option>
           <option value="이용정보">이용정보</option>
           <option value="온라인예매/우대정보">온라인예매/우대정보</option>
@@ -93,7 +124,7 @@ const QnaRegister = () => {
         </S.subtitle>
 
         <S.inputbox>
-          <S.StyledInput style={{ width: '850px'}} type="text" name="content" placeholder="제목을 입력해주세요."  value={qnaregister.content} onChange={handleChange} />
+          <S.StyledInput style={{ width: '850px'}} type="text" name="title" placeholder="제목을 입력해주세요."  value={qnaregister.title} onChange={handleChange} />
         </S.inputbox>
       </div>
 
@@ -103,7 +134,7 @@ const QnaRegister = () => {
         </S.subtitle>
 
         <S.inputbox>
-          <S.StyledInput style={{ width: '850px', height: '300px'}} type="text" name="content" placeholder="내용을 입력해주세요."  onChange={handleChange} />
+          <S.StyledInput style={{ width: '850px', height: '300px'}} type="text" name="content" placeholder="내용을 입력해주세요." value={qnaregister.content} onChange={handleChange} />
         </S.inputbox>
       </div>
 
